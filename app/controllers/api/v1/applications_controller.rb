@@ -2,7 +2,7 @@ module Api
     module V1
         class ApplicationsController < ApplicationController
             include Utils
-            before_action :set_application, only: [:show]
+            before_action :set_application, only: [:show , :update]
             skip_before_action :verify_authenticity_token
 
             def index
@@ -39,6 +39,18 @@ module Api
                   end
                 rescue ActiveRecord::RecordNotUnique => e
                   create
+                end
+            end
+
+            def update
+                if @application.update(application_params)
+                    render_success_response(
+                      data: ActiveModelSerializers::SerializableResource.new(@application, serializer: ApplicationSerializer),
+                      message: 'Application updated successfully', 
+                      status: :ok
+                    )
+                else
+                    render_error_response(@application.errors, 422)
                 end
             end
 
