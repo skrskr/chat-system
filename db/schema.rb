@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_05_163717) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_05_175402) do
   create_table "applications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name"
     t.string "token", limit: 16, null: false
@@ -36,6 +36,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_05_163717) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["application_id"], name: "index_chats_on_application_id"
+  end
+
+  create_table "message_numbers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "application_token", limit: 16
+    t.integer "chat_number"
+    t.integer "number", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["application_token", "chat_number"], name: "index_message_numbers_on_application_token_and_chat_number", unique: true
   end
 
   create_table "messages", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
