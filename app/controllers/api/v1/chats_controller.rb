@@ -2,7 +2,7 @@ module Api
   module V1
     class ChatsController < ApplicationController
         skip_before_action :verify_authenticity_token
-        before_action :set_application
+        before_action :set_application, except: [:create]
         before_action :set_chat, only: [:show, :update]
 
       
@@ -24,18 +24,21 @@ module Api
         end
 
         def create
-          @chat = @application.chats.new(chat_params)
-          @chat.number = @application.chats.count + 1
-      
-          if @chat.save
-            render_success_response(
-              data: ActiveModelSerializers::SerializableResource.new(@chat, serializer: ChatSerializer),
-              message: 'Chats created successfully', 
-              status: :ok
-            )          
-          else
-            render_error_response(@chat.errors, status: :unprocessable_entity)
+          @chat = nil
+          ChatNumber.transaction do
+            @chat_number = ChatNumber.where(application_token: params[:application_application_token]).lock(true).first_or_create!
+            @number = @chat_number.number
+            @chat = Chat.new(chat_params)
+            @chat.number = @number + 1
+            ChatCreationJob.perform_async(chat_params.to_json, params[:application_application_token], @number + 1)
+            @chat_number.update(number: @number + 1)
           end
+
+          render_success_response(
+            data: ActiveModelSerializers::SerializableResource.new(@chat, serializer: ChatSerializer),
+            message: 'Chats created successfully', 
+            status: :ok
+          )
         end
 
         def update

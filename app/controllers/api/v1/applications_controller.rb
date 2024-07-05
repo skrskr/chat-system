@@ -59,7 +59,7 @@ module Api
             def set_application
               @application = Application.find_by(token: params[:application_token])
               if @application.nil?
-                render_error_response("Application not found", status: :not_found, "Application not found")
+                render_error_response("Application not found", status: :not_found, message: "Application not found")
               end
             end
 
