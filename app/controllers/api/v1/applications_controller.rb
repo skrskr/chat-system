@@ -35,7 +35,7 @@ module Api
                       status: :created
                     )
                   else
-                      render_error_response(@application.errors, 422)
+                      render_error_response(@application.errors, status: :unprocessable_entity)
                   end
                 rescue ActiveRecord::RecordNotUnique => e
                   create
@@ -50,7 +50,7 @@ module Api
                       status: :ok
                     )
                 else
-                    render_error_response(@application.errors, 422)
+                    render_error_response(@application.errors, status: :unprocessable_entity)
                 end
             end
 
@@ -59,7 +59,7 @@ module Api
             def set_application
               @application = Application.find_by(token: params[:application_token])
               if @application.nil?
-                render_error_response("Application not found", 404, "Application not found")
+                render_error_response("Application not found", status: :not_found, "Application not found")
               end
             end
 
