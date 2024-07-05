@@ -50,6 +50,7 @@ gem "active_model_serializers", "~> 0.10.0"
 
 gem "will_paginate", "~> 3.3"
 
+gem "sidekiq", "~> 7.3"
 
 
 group :development, :test do
@@ -73,3 +74,4 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
