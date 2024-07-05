@@ -24,18 +24,21 @@ module Api
           end
   
           def create
-            @message = @chat.messages.new(message_params)
-            @message.number = @chat.messages.count + 1
-        
-            if @message.save
-              render_success_response(
-                data: ActiveModelSerializers::SerializableResource.new(@message, serializer: MessageSerializer),
-                message: 'Message created successfully', 
-                status: :ok
-              )          
-            else
-              render_error_response(@message.errors, status: :unprocessable_entity)
+            @message = nil
+            MessageNumber.transaction do
+              @message_number = MessageNumber.where(application_token: params[:application_application_token], chat_number: params[:chat_number]).lock(true).first_or_create!
+              @number = @message_number.number
+              @message = Message.new(message_params)
+              @message.number = @number + 1
+              MessageCreationJob.perform_async(@chat.id, @number + 1, params[:body])
+              @message_number.update(number: @number + 1)
             end
+            
+            render_success_response(
+              data: ActiveModelSerializers::SerializableResource.new(@message, serializer: MessageSerializer),
+              message: 'Message created successfully', 
+              status: :ok
+            )          
           end
   
           def update
@@ -53,8 +56,6 @@ module Api
           private
       
           def set_chat
-            print("set_chat")
-            print(params)
             @application = Application.find_by!(token: params[:application_application_token])
             @chat = @application.chats.find_by!(number: params[:chat_number])
           end

@@ -2,7 +2,7 @@ module Api
   module V1
     class ChatsController < ApplicationController
         skip_before_action :verify_authenticity_token
-        before_action :set_application, except: [:create]
+        before_action :set_application
         before_action :set_chat, only: [:show, :update]
 
       
@@ -29,8 +29,9 @@ module Api
             @chat_number = ChatNumber.where(application_token: params[:application_application_token]).lock(true).first_or_create!
             @number = @chat_number.number
             @chat = Chat.new(chat_params)
+            @name = chat_params[:name]
             @chat.number = @number + 1
-            ChatCreationJob.perform_async(chat_params.to_json, params[:application_application_token], @number + 1)
+            ChatCreationJob.perform_async(@application.id, @name, @number + 1)
             @chat_number.update(number: @number + 1)
           end
 

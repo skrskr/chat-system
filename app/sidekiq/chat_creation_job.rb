@@ -1,12 +1,11 @@
 class ChatCreationJob
   include Sidekiq::Job
 
-  def perform(chat_params, application_token, number)
+  def perform(application_id, name, number)
     puts("Chat Creation Job")
-    puts(chat_params)
-    @application = Application.find_by(token: application_token)
+    @application = Application.find_by(id: application_id)
     @chat = Chat.new()
-    @chat.name = chat_params["name"]
+    @chat.name = name
     @chat.application = @application
     @chat.number = number
     @chat.save
