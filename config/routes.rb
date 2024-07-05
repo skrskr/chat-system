@@ -11,7 +11,9 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :applications, param: :application_token, except: [:destroy] do
-        resources :chats, param: :number, except: [:destroy]
+        resources :chats, param: :number, except: [:destroy] do
+          resources :messages, param: :number, except: [:destroy]
+        end
       end
     end
   end
