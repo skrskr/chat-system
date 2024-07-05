@@ -1,0 +1,2 @@
+class ChatNumber < ApplicationRecord
+end
