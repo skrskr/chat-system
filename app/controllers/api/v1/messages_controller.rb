@@ -42,6 +42,10 @@ module Api
           end
   
           def create
+            # I think also it can be done efficient more than this way
+            # If we used redis to store message number for each chat
+            # But we need to keep it always synchronized with database 
+            # Handle cases when redis for whaterver reason
             message = nil
             MessageNumber.transaction do
               message_number = MessageNumber.where(application_token: params[:application_application_token], chat_number: params[:chat_number]).lock(true).first_or_create!
@@ -74,6 +78,8 @@ module Api
           private
       
           def set_chat
+            # I kept this queries to run before create just for validation
+            # I think validation can be done efficient more than this way
             @application = Application.find_by!(token: params[:application_application_token])
             @chat = @application.chats.find_by!(number: params[:chat_number])
           end

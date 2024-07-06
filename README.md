@@ -8,8 +8,8 @@ git clone https://github.com/skrskr/chat-system.git
 cd chat-system
 
 # 2- Set environment variables
-# For save time, i set variables with values on .env.example
-cp .env.example .env
+# For save time, i set variables with values on example.env
+cp example.env .env
 
 # 3- Run project using docker compose
 # compose added as subcommand to docker cli after specific version
