@@ -35,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: bundle exec sidekiq -C config/sidekiq.yml -q default -q counters
+    command: bundle exec sidekiq -C config/sidekiq.yml -q message_creation -q chat_creation -q counters -q default
     depends_on:
       - db
       - redis

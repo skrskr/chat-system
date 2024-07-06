@@ -1,7 +1,10 @@
 :concurrency: 5
 :queues:
-  - [default, 1]
+  - [message_creation, 5]
+  - [chat_creation, 3]
   - [counters, 1]
+  - [default, 1]
+
 :logfile: ./log/sidekiq.log
 :pidfile: ./tmp/pids/sidekiq.pid
 :timeout: 25

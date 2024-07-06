@@ -1,5 +1,6 @@
 class ChatCreationJob
   include Sidekiq::Job
+  sidekiq_options :queue => :chat_creation, :retry => 3
 
   def perform(application_id, name, number)
     puts("Chat Creation Job")

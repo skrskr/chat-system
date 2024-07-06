@@ -2,6 +2,7 @@ require 'json'
 
 class MessageCreationJob
   include Sidekiq::Job
+  sidekiq_options :queue => :message_creation, :retry => 3
 
   def perform(chat_id, number, body)
     puts("Message Creation Job")
