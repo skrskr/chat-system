@@ -7,11 +7,11 @@ module Api
 
       
         def index
-          @chats = @application.chats.paginate(page: params[:page], per_page: params[:per_page] || 10)
+          chats = @application.chats.paginate(page: params[:page], per_page: params[:per_page] || 10)
           render_success_response(
-            data: ActiveModelSerializers::SerializableResource.new(@chats, each_serializer: ChatSerializer),
+            data: ActiveModelSerializers::SerializableResource.new(chats, each_serializer: ChatSerializer),
             message: 'Chats fetched successfully', 
-            status: :ok, meta: @chats
+            status: :ok, meta: chats
           )
         end
 
@@ -24,19 +24,19 @@ module Api
         end
 
         def create
-          @chat = nil
+          chat = nil
           ChatNumber.transaction do
-            @chat_number = ChatNumber.where(application_token: params[:application_application_token]).lock(true).first_or_create!
-            @number = @chat_number.number
-            @chat = Chat.new(chat_params)
-            @name = chat_params[:name]
-            @chat.number = @number + 1
-            ChatCreationJob.perform_async(@application.id, @name, @number + 1)
-            @chat_number.update(number: @number + 1)
+            chat_number = ChatNumber.where(application_token: params[:application_application_token]).lock(true).first_or_create!
+            number = chat_number.number
+            chat = Chat.new(chat_params)
+            name = chat_params[:name]
+            chat.number = number + 1
+            ChatCreationJob.perform_async(@application.id, name, number + 1)
+            chat_number.update(number: number + 1)
           end
 
           render_success_response(
-            data: ActiveModelSerializers::SerializableResource.new(@chat, serializer: ChatSerializer),
+            data: ActiveModelSerializers::SerializableResource.new(chat, serializer: ChatSerializer),
             message: 'Chats created successfully', 
             status: :ok
           )
