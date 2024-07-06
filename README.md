@@ -15,6 +15,17 @@ cp example.env .env
 # compose added as subcommand to docker cli after specific version
 docker compose up 
 # if not working try docker-compose up
+
+# After it build containers
+# web app 
+# http://localhost:3000
+
+# elasticsearch app 
+# http://localhost:9200
+
+# kibana
+# http://localhost:5601
+
 ```
 
 ### Testing
