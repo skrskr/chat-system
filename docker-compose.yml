@@ -35,12 +35,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: bundle exec sidekiq
+    command: bundle exec sidekiq -C config/sidekiq.yml -q default -q counters
     depends_on:
       - db
       - redis
       - elasticsearch
-      - web
     volumes:
       - .:/rails
     environment:

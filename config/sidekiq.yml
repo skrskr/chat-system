@@ -1,0 +1,21 @@
+:concurrency: 5
+:queues:
+  - [default, 1]
+  - [counters, 1]
+:logfile: ./log/sidekiq.log
+:pidfile: ./tmp/pids/sidekiq.pid
+:timeout: 25
+:verbose: false
+:daemon: false
+
+:scheduler:
+  :schedule:
+    update_chats_count_job:
+      cron: "0 * * * *" # Run every hour, on the hour
+      class: "UpdateChatsCountJob"
+      queue: counters
+
+    update_messages_count_job:
+      cron: "0 * * * *" # Run every hour, on the hour
+      class: "UpdateMessagesCountJob"
+      queue: counters

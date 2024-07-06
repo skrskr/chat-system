@@ -51,6 +51,7 @@ gem "active_model_serializers", "~> 0.10.0"
 gem "will_paginate", "~> 3.3"
 
 gem "sidekiq", "~> 7.3"
+gem "sidekiq-scheduler", "~> 5.0"
 
 
 gem 'elasticsearch-model'
