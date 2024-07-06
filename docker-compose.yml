@@ -3,39 +3,43 @@ version: '3.8'
 services:
   db:
     image: mysql:8.0
+    container_name: chat_db
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: your_database_name
-      MYSQL_USER: your_username
-      MYSQL_PASSWORD: your_password
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
     ports:
-      - "3308:3306"
+      - '${DATABASE_PORT:-3306}:3306'
     volumes:
       - mysql_data:/var/lib/mysql
 
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
+    container_name: chat_web
+    restart: always
     ports:
-      - "3000:3000"
+      - '${APP_PORT:-3000}:3000'
     depends_on:
       - db
       - redis
       - elasticsearch
 
     environment:
-      DATABASE_URL: mysql2://your_username:your_password@db/your_database_name
+      DATABASE_URL: '${DATABASE_URL}'
     volumes:
       - .:/rails
-    # command: ["./bin/rails", "server"]
-    # entrypoint: /rails/bin/docker-entrypoint
 
   sidekiq:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     command: bundle exec sidekiq -C config/sidekiq.yml -q message_creation -q chat_creation -q counters -q default
+    container_name: chat_sidekiq
+    restart: always
     depends_on:
       - db
       - redis
@@ -43,22 +47,25 @@ services:
     volumes:
       - .:/rails
     environment:
-      DATABASE_URL: mysql2://your_username:your_password@db/your_database_name
+      DATABASE_URL: '${DATABASE_URL}'
 
   redis:
     image: redis:7
+    container_name: chat_redis
+    restart: always
     ports:
-      - "6379:6379"
+      - '${REDIS_PORT:-6379}:6379'
     volumes:
       - redis_data:/data
 
   elasticsearch:
-    container_name: elasticsearch
+    container_name: chat_elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:8.7.1
     # 8.x
     environment: ['CLI_JAVA_OPTS=-Xms2g -Xmx2g','bootstrap.memory_lock=true','discovery.type=single-node','xpack.security.enabled=false', 'xpack.security.enrollment.enabled=false']
+    restart: always
     ports:
-      - 9200:9200
+      - '${ELASTICSEARCH_PORT:-9200}:9200'
     volumes:
       - es_data:/usr/share/elasticsearch/data
     ulimits:
@@ -77,11 +84,13 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.7.1
-    container_name: kibana
+    container_name: chat_kibana
+    restart: always
     environment:
       XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: d1a66dfd-c4d3-4a0a-8290-2abcb83ab3aa
     ports:
-      - 5601:5601
+      - '${KIBANA_PORT:-5601}:5601'
+
     volumes:
       - kibana_data:/usr/share/kibana/data
     depends_on:
