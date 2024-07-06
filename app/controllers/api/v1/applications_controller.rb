@@ -6,12 +6,12 @@ module Api
             skip_before_action :verify_authenticity_token
 
             def index
-                @applications = Application.paginate(page: params[:page], per_page: params[:per_page] || 10)
+                applications = Application.paginate(page: params[:page], per_page: params[:per_page] || 10)
                 
                 render_success_response(
-                  data: ActiveModelSerializers::SerializableResource.new(@applications, each_serializer: ApplicationSerializer),
+                  data: ActiveModelSerializers::SerializableResource.new(applications, each_serializer: ApplicationSerializer),
                   message: 'Applications fetched successfully', 
-                  status: :ok, meta: @applications
+                  status: :ok, meta: applications
                 )
             end
 
@@ -25,17 +25,17 @@ module Api
 
             def create
                 begin
-                  @application = Application.new(application_params)
-                  @application.token = generate_random_token(8)
+                  application = Application.new(application_params)
+                  application.token = generate_random_token(8)
   
-                  if @application.save
+                  if application.save
                     render_success_response(
-                      data: ActiveModelSerializers::SerializableResource.new(@application, serializer: ApplicationSerializer),
+                      data: ActiveModelSerializers::SerializableResource.new(application, serializer: ApplicationSerializer),
                       message: 'Application created successfully', 
                       status: :created
                     )
                   else
-                      render_error_response(@application.errors, status: :unprocessable_entity)
+                      render_error_response(application.errors, status: :unprocessable_entity)
                   end
                 rescue ActiveRecord::RecordNotUnique => e
                   create
@@ -57,7 +57,7 @@ module Api
             private
 
             def set_application
-              @application = Application.find_by(token: params[:application_token])
+              @application = Application.find_by!(token: params[:application_token])
               if @application.nil?
                 render_error_response("Application not found", status: :not_found, message: "Application not found")
               end
