@@ -4,14 +4,32 @@ module Api
           skip_before_action :verify_authenticity_token
           before_action :set_chat
           before_action :set_message, only: [:show, :update]
-  
+        
+          def search
+            messages = Message.search({
+                query: {
+                  bool: {
+                    must: [
+                      { match: { body: { query: params[:query], fuzziness: 'AUTO' } } },  # Adjust for partial matching
+                      { match: { chat_id: @chat.id} }
+                    ]
+                  }
+                }
+              })
+              
+              render_success_response(
+                data: ActiveModelSerializers::SerializableResource.new(messages, each_serializer: SearchMessageSerializer),
+                message: 'Messages fetched successfully', 
+                status: :ok
+              )
+          end
         
           def index
-            @messages = @chat.messages.paginate(page: params[:page], per_page: params[:per_page] || 10)
+            messages = @chat.messages.paginate(page: params[:page], per_page: params[:per_page] || 10)
             render_success_response(
-              data: ActiveModelSerializers::SerializableResource.new(@messages, each_serializer: MessageSerializer),
+              data: ActiveModelSerializers::SerializableResource.new(messages, each_serializer: MessageSerializer),
               message: 'Messages fetched successfully', 
-              status: :ok, meta: @messages
+              status: :ok, meta: messages
             )
           end
   
@@ -24,18 +42,18 @@ module Api
           end
   
           def create
-            @message = nil
+            message = nil
             MessageNumber.transaction do
-              @message_number = MessageNumber.where(application_token: params[:application_application_token], chat_number: params[:chat_number]).lock(true).first_or_create!
-              @number = @message_number.number
-              @message = Message.new(message_params)
-              @message.number = @number + 1
-              MessageCreationJob.perform_async(@chat.id, @number + 1, params[:body])
-              @message_number.update(number: @number + 1)
+              message_number = MessageNumber.where(application_token: params[:application_application_token], chat_number: params[:chat_number]).lock(true).first_or_create!
+              number = message_number.number
+              message = Message.new(message_params)
+              message.number = number + 1
+              MessageCreationJob.perform_async(@chat.id, number + 1, params[:body])
+              message_number.update(number: number + 1)
             end
             
             render_success_response(
-              data: ActiveModelSerializers::SerializableResource.new(@message, serializer: MessageSerializer),
+              data: ActiveModelSerializers::SerializableResource.new(message, serializer: MessageSerializer),
               message: 'Message created successfully', 
               status: :ok
             )          

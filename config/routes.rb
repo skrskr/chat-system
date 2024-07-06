@@ -1,4 +1,4 @@
-require 'sidekiq/web'
+# require 'si dekiq/web'
 
 
 Rails.application.routes.draw do
@@ -15,10 +15,14 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :applications, param: :application_token, except: [:destroy] do
         resources :chats, param: :number, except: [:destroy] do
-          resources :messages, param: :number, except: [:destroy]
+          resources :messages, param: :number, except: [:destroy] do 
+            collection do
+              get 'search'
+            end
+          end
         end
       end
     end
   end
-  mount Sidekiq::Web => '/sidekiq'
+  # mount Sidekiq::Web => '/sidekiq'
 end
